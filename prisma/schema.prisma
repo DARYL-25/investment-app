@@ -1,0 +1,127 @@
+// Investment platform schema.
+// Local development uses SQLite (zero-setup). For production PostgreSQL,
+// change provider to "postgresql" and set DATABASE_URL accordingly —
+// the schema is written to be portable (no SQLite-only features, string
+// unions instead of enums which SQLite doesn't support).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  baseCurrency String   @default("USD")
+  plan         String   @default("free") // free | premium
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  portfolios  Portfolio[]
+  watchlists  Watchlist[]
+  alerts      Alert[]
+  resetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Portfolio {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  baseCurrency String   @default("USD")
+  benchmark    String   @default("^GSPC") // benchmark symbol
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  portfolioId String
+  // BUY | SELL | DIVIDEND | DEPOSIT | WITHDRAWAL | FEE
+  type        String
+  // STOCK | ETF | CASH
+  assetType   String   @default("STOCK")
+  symbol      String   @default("") // empty for pure cash movements
+  name        String   @default("")
+  quantity    Float    @default(0)
+  price       Float    @default(0) // per-unit price in `currency`
+  amount      Float    @default(0) // total cash amount (dividends, deposits, withdrawals)
+  fees        Float    @default(0)
+  currency    String   @default("USD")
+  date        DateTime
+  note        String   @default("")
+  createdAt   DateTime @default(now())
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, date])
+  @@index([portfolioId, symbol])
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items WatchlistItem[]
+
+  @@index([userId])
+}
+
+model WatchlistItem {
+  id          String   @id @default(cuid())
+  watchlistId String
+  symbol      String
+  assetType   String   @default("STOCK") // STOCK | ETF
+  note        String   @default("")
+  addedAt     DateTime @default(now())
+
+  watchlist Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+
+  @@unique([watchlistId, symbol])
+  @@index([watchlistId])
+}
+
+model Alert {
+  id        String    @id @default(cuid())
+  userId    String
+  symbol    String
+  // PRICE_ABOVE | PRICE_BELOW | PCT_DROP | PCT_RISE | PE_BELOW | PE_ABOVE | EARNINGS | DIVIDEND
+  kind      String
+  threshold Float     @default(0)
+  // for PCT_* alerts: reference price captured at creation
+  refPrice  Float     @default(0)
+  active    Boolean   @default(true)
+  triggeredAt DateTime?
+  lastValue Float?
+  note      String    @default("")
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active])
+}

@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark-first premium palette (HSL triplets consumed by Tailwind) */
+  --bg: 228 16% 4.5%;
+  --surface: 227 15% 7%;
+  --raised: 226 14% 10%;
+  --overlay: 226 14% 13%;
+  --stroke: 226 12% 14%;
+  --stroke-strong: 225 11% 22%;
+  --ink: 220 25% 96%;
+  --ink-mid: 220 11% 64%;
+  --ink-dim: 220 9% 42%;
+  --accent: 243 90% 68%;
+  --accent-soft: 243 55% 22%;
+  --gain: 152 62% 48%;
+  --loss: 0 78% 64%;
+  --warn: 38 92% 56%;
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-bg text-ink antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  text-rendering: optimizeLegibility;
+}
+
+/* financial figures align beautifully */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* scrollbars that match the theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--stroke-strong)) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: hsl(var(--stroke-strong));
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::selection {
+  background: hsl(var(--accent) / 0.35);
+}
+
+/* subtle gradient veil for hero surfaces */
+.hero-veil {
+  background:
+    radial-gradient(1200px 500px at 20% -10%, hsl(var(--accent) / 0.14), transparent 60%),
+    radial-gradient(900px 400px at 90% 0%, hsl(190 90% 50% / 0.08), transparent 55%);
+}
+
+.card-hover {
+  @apply transition-all duration-200 hover:border-stroke-strong hover:shadow-pop;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
