@@ -1,7 +1,8 @@
 // Investment platform schema.
-// Local development uses SQLite (zero-setup). For production PostgreSQL,
-// change provider to "postgresql" and set DATABASE_URL accordingly —
-// the schema is written to be portable (no SQLite-only features, string
+// Local development uses SQLite (zero-setup); production uses PostgreSQL.
+// The datasource provider below is rewritten automatically at build time by
+// scripts/prepare-db.mjs based on DATABASE_URL — don't edit it by hand.
+// The schema is written to be portable (no SQLite-only features, string
 // unions instead of enums which SQLite doesn't support).
 
 generator client {

@@ -58,9 +58,12 @@ On Windows with the portable Node install, `dev.cmd` starts the app directly.
 
 ## Deploy
 
-- **Vercel**: works as-is. Switch `prisma/schema.prisma` provider to `postgresql`,
-  point `DATABASE_URL` at Postgres (Neon/Supabase), set `AUTH_SECRET`.
-- The `build` script runs `prisma generate && prisma db push && next build`.
+- **Vercel**: import the repo, then in the project's **Storage** tab create a
+  **Neon (Postgres)** database and connect it — this sets `DATABASE_URL`
+  automatically. Add `AUTH_SECRET` under Settings → Environment Variables.
+- The build (`scripts/prepare-db.mjs`) detects a Postgres `DATABASE_URL` and
+  switches the Prisma provider automatically — no schema edits needed. Local
+  builds keep using SQLite.
 
 ## Add to iPhone
 
